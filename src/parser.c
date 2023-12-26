@@ -10,10 +10,7 @@
 
 static Expression* _allocate_expression(void) {
 	Expression* expression = malloc(sizeof(Expression));
-	if(expression == NULL) {
-		fputs("[ERROR] Out of Memory.\n", stderr);
-		exit(1);
-	}
+	CHECK_OUT_OF_MEMORY(expression);
 
 	return expression;
 }
@@ -34,10 +31,7 @@ static Expression* _parse_call_expression(FILE* file, Identifier identifier) {
 		fseek(file, location, SEEK_SET);
 
 		arguments = realloc(arguments, (argument_count + 1) * sizeof(Expression*));
-		if(arguments == NULL) {
-			fputs("[ERROR] Out of Memory.\n", stderr);
-			exit(1);
-		}
+		CHECK_OUT_OF_MEMORY(arguments);
 
 		arguments[argument_count++] = parse_expression(file, false);
 	}
@@ -188,10 +182,7 @@ FunctionDeclaration* parse_function_declaration(FILE* file, bool internal) {
 		}
 
 		arguments = realloc(arguments, (argument_count + 1) * sizeof(Identifier));
-		if(arguments == NULL) {
-			fputs("[ERROR] Out of Memory.\n", stderr);
-			exit(1);
-		}
+		CHECK_OUT_OF_MEMORY(arguments);
 
 		arguments[argument_count++] = token.data.identifier;
 	}
@@ -201,10 +192,7 @@ FunctionDeclaration* parse_function_declaration(FILE* file, bool internal) {
 	expect_punctuator(file, PUNC_CLOSE_PAREN);
 
 	FunctionDeclaration* declaration = malloc(sizeof(FunctionDeclaration));
-	if(declaration == NULL) {
-		fputs("[ERROR] Out of Memory.\n", stderr);
-		exit(1);
-	}
+	CHECK_OUT_OF_MEMORY(declaration);
 
 	declaration->name = identifier;
 	declaration->arguments = arguments;
@@ -248,10 +236,7 @@ Program* parse_program(FILE* file) {
 					FunctionDeclaration* declaration = parse_function_declaration(file, true);
 
 					functions = realloc(functions, (function_count + 1) * sizeof(FunctionDeclaration*));
-					if(functions == NULL) {
-						fputs("[ERROR] Out of Memory.\n", stderr);
-						exit(1);
-					}
+					CHECK_OUT_OF_MEMORY(functions);
 
 					functions[function_count++] = declaration;
 				}
@@ -260,10 +245,7 @@ Program* parse_program(FILE* file) {
 	}
 
 	Program* program = malloc(sizeof(Program));
-	if(program == NULL) {
-		fputs("[ERROR] Out of Memory.\n", stderr);
-		exit(1);
-	}
+	CHECK_OUT_OF_MEMORY(program);
 
 	program->functions = functions;
 	program->function_count = function_count;

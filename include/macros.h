@@ -5,6 +5,19 @@
 
 #define ARRAY_LENGTH( A) (sizeof( A) / sizeof(( A)[0]))
 
+#define OUT_OF_MEMORY() \
+	fputs("[ERROR] Out of Memory.\n", stderr); \
+	exit(1);
+
+#define CHECK_OUT_OF_MEMORY( P) \
+	if(( P) == NULL) { \
+		OUT_OF_MEMORY(); \
+	}
+
+#define TODO() \
+	fputs("[ERROR] Unimplemented Code Route.\n", stderr); \
+	exit(1);
+
 #define UNREACHABLE() \
 	fputs("[ERROR] Reached Unreachable.\n", stderr); \
 	exit(1);

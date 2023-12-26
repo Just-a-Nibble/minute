@@ -41,10 +41,7 @@ static Token _lex_keyword_or_identifier(FILE* file) {
 		}
 
 		string = realloc(string, string_length + 2);
-		if(string == NULL) {
-			fputs("[ERROR] Out of Memory.\n", stderr);
-			exit(1);
-		}
+		CHECK_OUT_OF_MEMORY(string);
 
 		string[string_length++] = (char)ch;
 	}
@@ -125,10 +122,7 @@ static Token _lex_string_literal(FILE* file) {
 		}
 
 		string = realloc(string, string_length + 2);
-		if(string == NULL) {
-			fputs("[ERROR] Out of Memory.\n", stderr);
-			exit(1);
-		}
+		CHECK_OUT_OF_MEMORY(string);
 
 		string[string_length++] = (char)ch;
 	}
