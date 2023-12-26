@@ -81,3 +81,9 @@ void print_function_declaration(FILE* output, const FunctionDeclaration* declara
 	print_expression(output, declaration->body, tab_depth + 1);
 }
 
+void print_program(FILE* output, const Program* program, unsigned int tab_depth) {
+	for(size_t i = 0; i < program->function_count; i++) {
+		print_function_declaration(output, program->functions[i], tab_depth);
+	}
+}
+

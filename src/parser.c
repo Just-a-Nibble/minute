@@ -39,7 +39,7 @@ static Expression* _parse_call_expression(FILE* file, Identifier identifier) {
 			exit(1);
 		}
 
-		arguments[argument_count++] = parse_expression(file);
+		arguments[argument_count++] = parse_expression(file, false);
 	}
 
 	Expression* expression = _allocate_expression();
@@ -55,9 +55,9 @@ static Expression* _parse_if_else_expression(FILE* file) {
 	Expression* expression = _allocate_expression();
 	expression->type = EXPR_IF_ELSE;
 
-	expression->data.if_else.condition  = parse_expression(file);
-	expression->data.if_else.true_body  = parse_expression(file);
-	expression->data.if_else.false_body = parse_expression(file);
+	expression->data.if_else.condition  = parse_expression(file, false);
+	expression->data.if_else.true_body  = parse_expression(file, false);
+	expression->data.if_else.false_body = parse_expression(file, false);
 
 	expect_punctuator(file, PUNC_CLOSE_PAREN);
 
@@ -71,18 +71,20 @@ static Expression* _parse_variable_declaration_expression(FILE* file) {
 	expect_punctuator(file, PUNC_OPEN_PAREN);
 
 	expression->data.variable_declaration.name  = expect_token(file, TOK_IDENTIFIER).data.identifier;
-	expression->data.variable_declaration.value = parse_expression(file);
+	expression->data.variable_declaration.value = parse_expression(file, false);
 
 	expect_punctuator(file, PUNC_CLOSE_PAREN);
 
-	expression->data.variable_declaration.expression = parse_expression(file);
+	expression->data.variable_declaration.expression = parse_expression(file, false);
 
 	expect_punctuator(file, PUNC_CLOSE_PAREN);
 
 	return expression;
 }
 
-Expression* parse_expression(FILE* file) {
+Expression* parse_expression(FILE* file, bool internal) {
+	UNUSED_PARAMETER(internal);
+
 	Expression* expression = NULL;
 
 	const Token token = next_token(file);
@@ -155,10 +157,14 @@ Expression* parse_expression(FILE* file) {
 	UNREACHABLE();
 }
 
-FunctionDeclaration* parse_function_declaration(FILE* file) {
-	expect_punctuator(file, PUNC_OPEN_PAREN);
+FunctionDeclaration* parse_function_declaration(FILE* file, bool internal) {
+	/* If this function is invoked by parse_program the initial "(defunc" will already been consumed. */
+	/* While it looks bad, this prevents us from needing to backtrack. */
+	if(!internal) {
+		expect_punctuator(file, PUNC_OPEN_PAREN);
 
-	expect_keyword(file, KEY_DEFUNC);
+		expect_keyword(file, KEY_DEFUNC);
+	}
 
 	Identifier identifier = expect_token(file, TOK_IDENTIFIER).data.identifier;
 
@@ -190,7 +196,7 @@ FunctionDeclaration* parse_function_declaration(FILE* file) {
 		arguments[argument_count++] = token.data.identifier;
 	}
 
-	Expression* body = parse_expression(file);
+	Expression* body = parse_expression(file, false);
 
 	expect_punctuator(file, PUNC_CLOSE_PAREN);
 
@@ -206,5 +212,62 @@ FunctionDeclaration* parse_function_declaration(FILE* file) {
 	declaration->body = body;
 
 	return declaration;
+}
+
+Program* parse_program(FILE* file) {
+	FunctionDeclaration** functions = NULL;
+	size_t function_count = 0;
+
+	Token token;
+	while((token = next_token(file)).type != TOK_EOF) {
+		if(token.type != TOK_PUNCTUATOR) {
+			fprintf(stderr, "[ERROR] Unexpected %s When Parsing Program.\n",
+				token_type_to_string(token.type)
+			);
+			exit(1);
+		}
+
+		if(token.data.punctuator != PUNC_OPEN_PAREN) {
+			fprintf(stderr, "[ERROR] Unexpected Punctuator '%s' When Parsing Program.\n",
+				punctuator_to_string(token.data.punctuator)
+			);
+			exit(1);
+		}
+
+		token = expect_token(file, TOK_KEYWORD);
+		switch(token.data.keyword) {
+			case KEY_VAR:
+			case KEY_IF:
+				fprintf(stderr, "[ERROR] Unexpected Keyword '%s'; Expected 'defunc'.\n",
+					keyword_to_string(token.data.keyword)
+				);
+				exit(1);
+
+			case KEY_DEFUNC:
+				{
+					FunctionDeclaration* declaration = parse_function_declaration(file, true);
+
+					functions = realloc(functions, (function_count + 1) * sizeof(FunctionDeclaration*));
+					if(functions == NULL) {
+						fputs("[ERROR] Out of Memory.\n", stderr);
+						exit(1);
+					}
+
+					functions[function_count++] = declaration;
+				}
+				break;
+		}
+	}
+
+	Program* program = malloc(sizeof(Program));
+	if(program == NULL) {
+		fputs("[ERROR] Out of Memory.\n", stderr);
+		exit(1);
+	}
+
+	program->functions = functions;
+	program->function_count = function_count;
+
+	return program;
 }
 

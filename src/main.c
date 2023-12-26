@@ -1,8 +1,5 @@
 #include <stdio.h>
 
-#include "token.h"
-#include "lexer.h"
-
 #include "ast.h"
 #include "parser.h"
 
@@ -14,11 +11,10 @@ int main(int argc, const char* argv[]) {
 
 	FILE* input = fopen("input.txt", "r");
 	if(input != NULL) {
-		FunctionDeclaration* function = parse_function_declaration(input);
+		Program* program = parse_program(input);
+		printf("%p\n", (void*)program);
 
-		printf("%p\n", (void*)function);
-
-		print_function_declaration(stdout, function, 0);
+		print_program(stdout, program, 0);
 
 		fclose(input);
 	}

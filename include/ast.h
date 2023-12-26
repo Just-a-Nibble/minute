@@ -63,8 +63,14 @@ typedef struct {
 	Expression* body;
 } FunctionDeclaration;
 
+typedef struct {
+	FunctionDeclaration** functions;
+	size_t function_count;
+} Program;
+
 void print_expression(FILE* output, const Expression* expression, unsigned int tab_depth);
 void print_function_declaration(FILE* output, const FunctionDeclaration* declaration, unsigned int tab_depth);
+void print_program(FILE* output, const Program* program, unsigned int tab_depth);
 
 #endif /* _AST_H */
 
