@@ -9,6 +9,8 @@
 #include "ast.h"
 #include "value.h"
 
+#include "native_functions.h"
+
 #include "macros.h"
 
 static Value scope_find(ScopeNode* node, const String name) {
@@ -119,6 +121,11 @@ Value eval_function_call_from_name(
 		if(strcmp(name, program->functions[i]->name) == 0) {
 			return eval_function_call(program->functions[i], program, arguments, argument_count);
 		}
+	}
+
+	NativeFunction native_function = get_native_function(name);
+	if(native_function != NULL) {
+		return native_function(program, arguments, argument_count);
 	}
 
 	fprintf(stderr, "[ERROR] Function '%s' Not Defined.\n",
