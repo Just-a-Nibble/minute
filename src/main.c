@@ -1,6 +1,10 @@
 #include <stdio.h>
 
+#include "token.h"
 #include "lexer.h"
+
+#include "ast.h"
+#include "parser.h"
 
 #include "macros.h"
 
@@ -10,15 +14,11 @@ int main(int argc, const char* argv[]) {
 
 	FILE* input = fopen("input.txt", "r");
 	if(input != NULL) {
-		Token token;
+		FunctionDeclaration* function = parse_function_declaration(input);
 
-		do {
-			token = next_token(input);
+		printf("%p\n", (void*)function);
 
-			printf("%s\n", token_type_to_string(token.type));
-
-			destroy_token(&token);
-		} while (token.type != TOK_EOF);
+		print_function_declaration(stdout, function, 0);
 
 		fclose(input);
 	}
