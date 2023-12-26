@@ -1,6 +1,8 @@
 #ifndef _TOKEN_H
 #define _TOKEN_H
 
+#include "types.h"
+
 typedef enum {
 	TOK_IDENTIFIER,
 	TOK_KEYWORD,
@@ -10,8 +12,6 @@ typedef enum {
 	TOK_STRING_LITERAL,
 	TOK_EOF
 } TokenType;
-
-typedef char* Identifier;
 
 typedef enum {
 	KEY_DEFUNC,
@@ -24,11 +24,10 @@ typedef enum {
 	PUNC_CLOSE_PAREN
 } Punctuator;
 
-typedef int IntegerLiteral;
-
-typedef float FloatLiteral;
-
-typedef char* StringLiteral;
+typedef String Identifier;
+typedef Integer IntegerLiteral;
+typedef Float FloatLiteral;
+typedef String StringLiteral;
 
 typedef struct {
 	TokenType type;
